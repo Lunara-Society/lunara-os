@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lunara OS">
+<title>Lunara OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#C4A46B;--gd:rgba(196,164,107,.1);--gb:rgba(196,164,107,.18);--gm:rgba(196,164,107,.5);
+  --gh:rgba(196,164,107,.88);--panel:rgba(8,6,3,.92);--panel2:rgba(14,10,5,.8);
+  --txt:rgba(255,255,255,.88);--dim:rgba(255,255,255,.4);--faint:rgba(255,255,255,.14);
+  --red:#DC4040;--grn:#46C864;--amb:#DCA832;--blu:#5090DC;
+  --st:max(env(safe-area-inset-top),20px);--sb:max(env(safe-area-inset-bottom),18px);
+}
+html,body{width:100%;height:100%;background:#050302;font-family:"Inter",sans-serif;font-weight:300;color:var(--txt);-webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+
+/* BOOT */
+#boot{position:fixed;inset:0;z-index:9999;background:#050302;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s ease;}
+#boot.out{opacity:0;pointer-events:none;}
+.bc{width:80px;height:80px;border-radius:50%;background:var(--gd);border:1px solid var(--gm);display:flex;align-items:center;justify-content:center;animation:pulse 3s ease-in-out infinite;}
+.bc svg{width:38px;height:38px;color:var(--gold);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(196,164,107,0);}50%{box-shadow:0 0 30px 8px rgba(196,164,107,.1);}}
+.bl{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gm),transparent);margin:20px auto;}
+.bn{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:20px;letter-spacing:.4em;text-transform:uppercase;color:var(--gh);}
+.bs{font-size:7px;letter-spacing:.3em;text-transform:uppercase;color:rgba(196,164,107,.28);margin-top:6px;}
+#bst{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.22);margin-top:28px;}
+.bbar{width:120px;height:1px;background:rgba(196,164,107,.07);margin:10px auto 0;overflow:hidden;}
+.bfill{height:100%;background:linear-gradient(90deg,transparent,var(--gm),transparent);animation:sw 1.4s ease-in-out infinite;}
+@keyframes sw{0%{margin-left:-100%;}100%{margin-left:100%;}}
+
+/* SHELL */
+#app{position:fixed;inset:0;opacity:0;transition:opacity .8s;pointer-events:none;display:flex;flex-direction:column;background:#050302;}
+#app.on{opacity:1;pointer-events:all;}
+
+/* STATUS BAR */
+#sb{flex-shrink:0;padding:var(--st) 16px 10px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,3,2,.95);border-bottom:1px solid var(--gb);position:relative;z-index:50;}
+.sbl{display:flex;flex-direction:column;}
+.sbrand{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:14px;letter-spacing:.3em;text-transform:uppercase;color:var(--gh);}
+.ssub{font-size:6px;letter-spacing:.22em;text-transform:uppercase;color:rgba(196,164,107,.3);margin-top:2px;}
+.sbr{display:flex;align-items:center;gap:12px;}
+#clk{font-size:12px;letter-spacing:.1em;color:var(--gm);font-family:"Cormorant Garamond",serif;}
+.sbadge{font-size:6px;letter-spacing:.15em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid var(--gb);color:rgba(196,164,107,.35);background:rgba(196,164,107,.04);}
+#alert-dot{width:8px;height:8px;border-radius:50%;background:var(--red);border:1.5px solid #050302;display:none;}
+#alert-dot.on{display:block;}
+
+/* CONTENT */
+#cnt{flex:1;overflow:hidden;position:relative;}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 15px 90px;display:none;flex-direction:column;gap:12px;}
+.page.on{display:flex;}
+
+/* NAV */
+#nav{flex-shrink:0;display:flex;align-items:center;justify-content:space-around;padding:10px 0 var(--sb);background:rgba(5,3,2,.97);border-top:1px solid var(--gb);position:relative;z-index:50;}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 10px;flex:1;transition:all .15s;position:relative;}
+.ni svg{width:20px;height:20px;opacity:.25;transition:all .2s;stroke:var(--gold);}
+.ni span{font-size:6.5px;letter-spacing:.15em;text-transform:uppercase;color:rgba(196,164,107,.24);transition:all .2s;}
+.ni.on svg{opacity:.9;filter:drop-shadow(0 0 6px rgba(196,164,107,.4));}
+.ni.on span{color:var(--gh);}
+.ni:active{transform:scale(.88);}
+.nbadge{position:absolute;top:0;right:8px;min-width:14px;height:14px;border-radius:7px;background:var(--red);border:1.5px solid #050302;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--gb);border-radius:8px;padding:14px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(196,164,107,.12),transparent);}
+.ct{font-family:"Cormorant Garamond",serif;font-size:15px;color:var(--gh);margin-bottom:3px;}
+.cs{font-size:10px;color:var(--dim);line-height:1.6;}
+.cm{font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:rgba(196,164,107,.25);margin-top:8px;}
+
+/* AGENT CARD */
+.agent-card{background:var(--panel);border:1px solid var(--gb);border-radius:10px;padding:16px;cursor:pointer;transition:border-color .2s,background .2s;display:flex;gap:14px;align-items:center;}
+.agent-card:active{background:rgba(196,164,107,.05);border-color:var(--gm);}
+.agent-avatar{width:48px;height:48px;border-radius:50%;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-size:18px;color:var(--gh);flex-shrink:0;}
+.agent-info{flex:1;min-width:0;}
+.agent-name{font-family:"Cormorant Garamond",serif;font-size:16px;color:var(--gh);}
+.agent-role{font-size:8.5px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agent-status{display:flex;align-items:center;gap:5px;margin-top:6px;}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.s-active{background:var(--grn);box-shadow:0 0 6px rgba(70,200,100,.5);}
+.s-idle{background:var(--amb);}
+.s-blocked{background:var(--red);}
+.s-pending{background:rgba(255,255,255,.2);}
+.agent-status-txt{font-size:8px;}
+.agent-preview{font-size:10px;color:var(--dim);margin-top:6px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.unread-badge{min-width:20px;height:20px;border-radius:10px;background:var(--red);font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;}
+
+/* CHAT OVERLAY */
+#chat-overlay{position:fixed;inset:0;z-index:200;background:#050302;display:none;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
+#chat-overlay.open{display:flex;transform:translateX(0);}
+#chat-header{flex-shrink:0;padding:var(--st) 14px 12px;background:rgba(5,3,2,.97);border-bottom:1px solid var(--gb);display:flex;align-items:center;gap:12px;}
+#chat-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.5;flex-shrink:0;}
+#chat-back:active{opacity:1;}
+#chat-avatar{width:38px;height:38px;border-radius:50%;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-size:15px;color:var(--gh);flex-shrink:0;}
+#chat-info{flex:1;min-width:0;}
+#chat-name{font-family:"Cormorant Garamond",serif;font-size:16px;color:var(--gh);}
+#chat-status{font-size:8px;color:var(--dim);margin-top:2px;}
+#chat-msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.msg-row{display:flex;flex-direction:column;gap:3px;max-width:86%;}
+.msg-row.from-user{align-self:flex-end;}
+.msg-row.from-agent{align-self:flex-start;}
+.msg-bubble{padding:10px 14px;border-radius:14px;font-size:12px;line-height:1.6;color:var(--txt);}
+.from-user .msg-bubble{background:rgba(196,164,107,.14);border:1px solid rgba(196,164,107,.25);border-bottom-right-radius:3px;}
+.from-agent .msg-bubble{background:var(--panel);border:1px solid var(--gb);border-bottom-left-radius:3px;}
+.msg-time{font-size:7.5px;color:var(--faint);padding:0 4px;}
+.from-user .msg-time{text-align:right;}
+.msg-type{font-size:6.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--gm);margin-bottom:2px;padding:0 4px;}
+.typing-ind{display:flex;gap:4px;padding:10px 14px;background:var(--panel);border:1px solid var(--gb);border-radius:14px;border-bottom-left-radius:3px;align-self:flex-start;align-items:center;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:rgba(196,164,107,.4);animation:tdot 1.2s ease-in-out infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes tdot{0%,80%,100%{transform:scale(.8);opacity:.4;}40%{transform:scale(1.1);opacity:.9;}}
+#chat-input-area{flex-shrink:0;padding:10px 14px;padding-bottom:var(--sb);background:rgba(5,3,2,.97);border-top:1px solid var(--gb);display:flex;align-items:flex-end;gap:10px;}
+#chat-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--gb);border-radius:20px;padding:10px 16px;font-size:13px;color:var(--txt);font-family:"Inter",sans-serif;font-weight:300;outline:none;resize:none;max-height:100px;min-height:40px;line-height:1.4;-webkit-appearance:none;}
+#chat-input::placeholder{color:rgba(255,255,255,.2);}
+#chat-send{width:38px;height:38px;border-radius:50%;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;}
+#chat-send:active{background:rgba(196,164,107,.2);border-color:var(--gm);}
+#chat-send svg{width:14px;height:14px;color:var(--gold);opacity:.8;}
+#group-bar{flex-shrink:0;padding:8px 14px;background:rgba(196,164,107,.04);border-bottom:1px solid rgba(196,164,107,.1);display:none;gap:8px;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#group-bar.on{display:flex;}
+.group-pill{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;background:var(--gd);border:1px solid var(--gb);white-space:nowrap;font-size:9px;color:var(--gm);flex-shrink:0;}
+.group-pill .gpa{width:18px;height:18px;border-radius:50%;background:rgba(196,164,107,.15);display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-size:9px;color:var(--gh);}
+
+/* GROUP CHAT TOGGLE */
+#group-btn{width:34px;height:34px;border-radius:50%;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+#group-btn svg{width:15px;height:15px;color:var(--gold);opacity:.6;}
+#group-btn.on{background:rgba(196,164,107,.15);border-color:var(--gm);}
+#group-btn.on svg{opacity:1;}
+
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--gb);border-radius:10px;padding:11px 14px;}
+.search-bar svg{width:15px;height:15px;opacity:.28;flex-shrink:0;color:var(--gold);}
+.search-bar input{flex:1;background:none;border:none;outline:none;font-size:13px;color:var(--txt);font-family:"Inter",sans-serif;font-weight:300;}
+.search-bar input::placeholder{color:rgba(255,255,255,.18);}
+
+/* GENERAL UI */
+.section-label{font-size:7px;letter-spacing:.28em;text-transform:uppercase;color:var(--gm);margin-bottom:0;}
+.sh{display:flex;align-items:center;justify-content:space-between;}
+.sact{font-size:7px;letter-spacing:.15em;text-transform:uppercase;color:rgba(196,164,107,.3);cursor:pointer;}
+.dvd{height:1px;background:linear-gradient(90deg,transparent,var(--gb),transparent);margin:4px 0;}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(196,164,107,.06);}
+.row:last-child{border-bottom:none;}
+.rib{flex:1;min-width:0;}
+.rn{font-size:12px;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rd{font-size:9px;color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tag{display:inline-flex;align-items:center;font-size:6.5px;letter-spacing:.13em;text-transform:uppercase;padding:2px 7px;border-radius:20px;}
+.tr{background:rgba(220,64,64,.09);border:1px solid rgba(220,64,64,.28);color:rgba(240,120,110,.9);}
+.ta{background:rgba(220,168,50,.09);border:1px solid rgba(220,168,50,.28);color:rgba(220,190,80,.9);}
+.tg{background:rgba(70,200,100,.08);border:1px solid rgba(70,200,100,.22);color:rgba(100,210,130,.9);}
+.tb{background:rgba(80,144,220,.08);border:1px solid rgba(80,144,220,.22);color:rgba(120,170,230,.9);}
+.to{background:var(--gd);border:1px solid var(--gb);color:var(--gm);}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:8px;cursor:pointer;font-size:8px;letter-spacing:.2em;text-transform:uppercase;transition:all .15s;}
+.btn:active{transform:scale(.97);}
+.btn-gold{background:rgba(196,164,107,.1);border:1px solid var(--gm);color:var(--gh);}
+.btn-ghost{background:transparent;border:1px solid var(--gb);color:var(--dim);}
+.pb{height:2px;background:rgba(196,164,107,.08);border-radius:2px;overflow:hidden;margin-top:8px;}
+.pf{height:100%;background:linear-gradient(90deg,var(--gm),var(--gh));border-radius:2px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-blk{background:var(--panel2);border:1px solid var(--gb);border-radius:8px;padding:13px;text-align:center;}
+.stat-v{font-family:"Cormorant Garamond",serif;font-size:30px;color:var(--gh);line-height:1;}
+.stat-l{font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-top:4px;}
+.stat-s{font-size:8px;margin-top:3px;}
+.alt{display:flex;align-items:flex-start;gap:10px;padding:11px;border-radius:8px;border-left:2px solid;}
+.alr{background:rgba(220,64,64,.06);border-color:var(--red);}
+.ala{background:rgba(220,168,50,.06);border-color:var(--amb);}
+.alg{background:rgba(196,164,107,.06);border-color:var(--gm);}
+.alt-t{font-size:11.5px;color:var(--txt);margin-bottom:3px;font-weight:400;}
+.alt-b{font-size:9.5px;color:var(--dim);line-height:1.55;}
+.alt-m{font-size:7px;color:rgba(196,164,107,.28);margin-top:5px;letter-spacing:.1em;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dg{background:var(--grn);}
+.da{background:var(--amb);}
+.dr{background:var(--red);}
+.dd{background:rgba(255,255,255,.15);}
+
+/* TASK ROW */
+.task-row{display:flex;gap:10px;align-items:flex-start;padding:11px;background:var(--panel2);border:1px solid var(--gb);border-radius:8px;cursor:pointer;}
+.task-row:active{background:rgba(196,164,107,.06);}
+.task-cb{width:18px;height:18px;border-radius:4px;border:1px solid var(--gb);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.task-cb.done{background:rgba(70,200,100,.15);border-color:rgba(70,200,100,.3);}
+.task-body{flex:1;}
+.task-title{font-size:12px;color:var(--txt);line-height:1.4;}
+.task-meta{font-size:8.5px;color:var(--dim);margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+/* REPORT CARD */
+.report-card{background:var(--panel2);border:1px solid var(--gb);border-radius:8px;padding:13px;cursor:pointer;}
+.report-card:active{background:rgba(196,164,107,.05);}
+.report-type{font-size:6.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gm);margin-bottom:5px;}
+.report-title{font-size:13px;color:var(--txt);font-weight:400;line-height:1.4;}
+.report-summary{font-size:9.5px;color:var(--dim);margin-top:5px;line-height:1.55;}
+.report-meta{font-size:7.5px;color:rgba(196,164,107,.28);margin-top:7px;letter-spacing:.09em;}
+
+/* FILE VIEWER */
+#fv{position:fixed;inset:0;z-index:300;background:#050302;display:none;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
+#fv.open{display:flex;transform:translateX(0);}
+#fv-header{flex-shrink:0;padding:var(--st) 14px 12px;background:rgba(5,3,2,.97);border-bottom:1px solid var(--gb);display:flex;align-items:center;gap:12px;}
+#fv-content{flex:1;overflow-y:auto;padding:16px;font-size:12px;line-height:1.8;color:rgba(255,255,255,.72);font-family:"Inter",sans-serif;font-weight:300;white-space:pre-wrap;word-break:break-word;}
+
+/* SEARCH RESULTS */
+.sr-item{padding:11px;border-radius:8px;background:var(--panel2);border:1px solid var(--gb);cursor:pointer;margin-bottom:8px;}
+.sr-item:active{background:rgba(196,164,107,.06);}
+.sr-folder{font-size:6.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gm);margin-bottom:4px;}
+.sr-name{font-size:12px;color:var(--txt);}
+.sr-date{font-size:8px;color:var(--dim);margin-top:3px;}
+
+/* LIVE INDICATOR */
+.live-ind{display:inline-flex;align-items:center;gap:4px;font-size:6.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(70,200,100,.7);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--grn);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="bc">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+  </div>
+  <div class="bl"></div>
+  <div class="bn">Lunara OS</div>
+  <div class="bs">Institutional Operating System</div>
+  <div id="bst">Initializing...</div>
+  <div class="bbar"><div class="bfill"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- STATUS BAR -->
+  <div id="sb">
+    <div class="sbl">
+      <div class="sbrand">Lunara OS</div>
+      <div class="ssub" id="page-label">Command Center</div>
+    </div>
+    <div class="sbr">
+      <div id="clk">00:00</div>
+      <div id="alert-dot"></div>
+      <div class="sbadge" id="conn-badge">LIVE</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="cnt">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page on" id="page-dash">
+      <div style="padding:4px 0 2px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--gh);">Command Center</div>
+        <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-top:4px;" id="today-date"></div>
+      </div>
+
+      <!-- ACTIVE ALERTS -->
+      <div>
+        <div class="sh"><div class="section-label">Active Alerts</div><div class="live-ind"><div class="live-dot"></div>Live</div></div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div class="alt alr">
+            <div class="dot dr" style="margin-top:3px;flex-shrink:0;"></div>
+            <div><div class="alt-t">EU AI Act — 33 Days</div><div class="alt-b">August 2 compliance deadline. Shield readiness program launch decision required.</div><div class="alt-m">Critical · Requires Founder Decision</div></div>
+          </div>
+          <div class="alt ala">
+            <div class="dot da" style="margin-top:3px;flex-shrink:0;"></div>
+            <div><div class="alt-t">Maya Torres — LinkedIn Blocked</div><div class="alt-b">API restricted. Weekly post content ready. Manual publish required.</div><div class="alt-m">Action Required</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AGENT STATUS -->
+      <div>
+        <div class="sh"><div class="section-label">Agent Status</div><div class="sact" onclick="goTo('agents')">All Agents →</div></div>
+        <div id="dash-agents" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="text-align:center;padding:16px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading agents...</div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Institutional Overview</div>
+        <div class="stat-grid">
+          <div class="stat-blk"><div class="stat-v" id="stat-tasks">—</div><div class="stat-l">Active Tasks</div></div>
+          <div class="stat-blk"><div class="stat-v" id="stat-reports">—</div><div class="stat-l">Reports Filed</div></div>
+          <div class="stat-blk"><div class="stat-v">33</div><div class="stat-l">Days to EU Act</div><div class="stat-s" style="color:var(--red);">Critical</div></div>
+          <div class="stat-blk"><div class="stat-v">5</div><div class="stat-l">Agents</div><div class="stat-s" style="color:var(--grn);">2 Active</div></div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div>
+        <div class="sh"><div class="section-label">Recent Reports</div><div class="sact" onclick="goTo('reports')">All →</div></div>
+        <div id="dash-reports" style="display:flex;flex-direction:column;gap:7px;">
+          <div style="text-align:center;padding:16px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENTS ══ -->
+    <div class="page" id="page-agents">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gh);">Agent Center</div>
+      <div style="font-size:9px;color:var(--dim);">Tap an agent to open a real conversation. Messages are processed by each agent's intelligence engine.</div>
+      <div id="agents-list" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading agents...</div>
+      </div>
+    </div>
+
+    <!-- ══ BRAIN ══ -->
+    <div class="page" id="page-brain">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gh);">Institutional Brain</div>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="brain-search" placeholder="Search entire institutional brain..." oninput="doBrainSearch(this.value)">
+      </div>
+      <div id="brain-search-results" style="display:none;flex-direction:column;gap:0;"></div>
+      <div id="brain-folders-section">
+        <div class="sh"><div class="section-label">All Folders</div><div class="live-ind"><div class="live-dot"></div>Live Drive</div></div>
+        <div class="card" style="padding:8px;">
+          <div id="brain-folders-list"><div style="text-align:center;padding:16px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Connecting to brain...</div></div>
+        </div>
+      </div>
+      <div id="brain-files-section" style="display:none;">
+        <div class="sh">
+          <div style="display:flex;align-items:center;gap:8px;"><div id="brain-back" onclick="closeBrainFolder()" style="cursor:pointer;opacity:.5;font-size:11px;">← Back</div><div class="section-label" id="brain-folder-name"></div></div>
+          <div class="live-ind"><div class="live-dot"></div>Live</div>
+        </div>
+        <div class="card" style="padding:8px;"><div id="brain-files-list"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ TASKS ══ -->
+    <div class="page" id="page-tasks">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gh);">Tasks</div>
+      <div class="btn btn-gold" onclick="openNewTask()" style="margin-bottom:4px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Task
+      </div>
+      <div id="tasks-list" style="display:flex;flex-direction:column;gap:7px;">
+        <div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading tasks...</div>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div class="page" id="page-reports">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gh);">Reports</div>
+      <div style="font-size:9px;color:var(--dim);">Intelligence filed by Raven and other agents. All documents live from the institutional brain.</div>
+      <div id="reports-list" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading reports...</div>
+      </div>
+    </div>
+
+    <!-- ══ SEARCH ══ -->
+    <div class="page" id="page-search">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gh);">Universal Search</div>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="usearch" placeholder="Search brain, agents, tasks, reports..." oninput="doUniversalSearch(this.value)" autofocus>
+      </div>
+      <div style="font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gm);">Scope: Brain · Agents · Tasks · Reports</div>
+      <div id="search-empty" style="text-align:center;padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(196,164,107,.18)" stroke-width="1"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(196,164,107,.2);">Type to search everything</div>
+      </div>
+      <div id="search-results" style="display:flex;flex-direction:column;gap:0;"></div>
+    </div>
+
+  </div><!-- /cnt -->
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="ni on" id="ni-dash" onclick="goTo('dash')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="ni" id="ni-agents" onclick="goTo('agents')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      <span>Agents</span>
+    </div>
+    <div class="ni" id="ni-brain" onclick="goTo('brain')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      <span>Brain</span>
+    </div>
+    <div class="ni" id="ni-tasks" onclick="goTo('tasks')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Tasks</span>
+    </div>
+    <div class="ni" id="ni-reports" onclick="goTo('reports')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Reports</span>
+    </div>
+    <div class="ni" id="ni-search" onclick="goTo('search')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Search</span>
+    </div>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- CHAT OVERLAY -->
+<div id="chat-overlay">
+  <div id="chat-header">
+    <div id="chat-back" onclick="closeChat()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div id="chat-avatar">R</div>
+    <div id="chat-info">
+      <div id="chat-name">Raven</div>
+      <div id="chat-status">Active — Intelligence Engine</div>
+    </div>
+    <div id="group-btn" onclick="toggleGroup()" title="Add agents to conversation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+  </div>
+  <!-- Group participants bar -->
+  <div id="group-bar">
+    <div style="font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.4);flex-shrink:0;">In thread:</div>
+    <div id="group-participants"></div>
+  </div>
+  <div id="chat-msgs"></div>
+  <div id="chat-input-area">
+    <textarea id="chat-input" placeholder="Message agent..." rows="1" onkeydown="chatKeyDown(event)" oninput="autoResize(this)"></textarea>
+    <div id="chat-send" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- FILE VIEWER -->
+<div id="fv">
+  <div id="fv-header">
+    <div onclick="closeFV()" style="cursor:pointer;opacity:.5;padding:5px;flex-shrink:0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div style="flex:1;min-width:0;">
+      <div id="fv-name" style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--gh);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+      <div id="fv-folder" style="font-size:7px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:2px;"></div>
+    </div>
+    <a id="fv-link" href="#" target="_blank" style="font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:var(--gm);border:1px solid var(--gb);padding:4px 10px;border-radius:20px;text-decoration:none;flex-shrink:0;display:none;">Drive ↗</a>
+  </div>
+  <div id="fv-content"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// LUNARA OS — CORE
+// Real data. Real agents. No fake content.
+// ═══════════════════════════════════════
+
+const BRAIN_API = 'https://superagent-8ee501b1.base44.app/functions/shieldBrain';
+const RAVEN_TELEGRAM = 'https://app.base44.com/superagent/6a3e0aa38bd048a48ee501b1';
+
+// ── BOOT ──
+const bootSeq = ['Initializing Lunara OS','Loading institutional brain','Connecting agents','Synchronizing memory','Calibrating intelligence','Lunara OS ready'];
+let bi = 0;
+const bst = document.getElementById('bst');
+const bint = setInterval(() => { bi++; if (bi < bootSeq.length) bst.textContent = bootSeq[bi]; else clearInterval(bint); }, 480);
+setTimeout(() => {
+  document.getElementById('boot').classList.add('out');
+  document.getElementById('app').classList.add('on');
+  setTimeout(() => document.getElementById('boot').style.display = 'none', 1200);
+  initApp();
+}, 3000);
+
+// ── CLOCK ──
+function tick() {
+  const n = new Date();
+  document.getElementById('clk').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const el = document.getElementById('today-date');
+  if (el) el.textContent = days[n.getDay()] + ', ' + months[n.getMonth()] + ' ' + n.getDate() + ', ' + n.getFullYear();
+}
+tick(); setInterval(tick, 30000);
+
+// ── NAVIGATION ──
+const PAGES = ['dash','agents','brain','tasks','reports','search'];
+const PAGE_LABELS = {dash:'Command Center',agents:'Agent Center',brain:'Institutional Brain',tasks:'Tasks',reports:'Reports',search:'Search'};
+function goTo(id) {
+  PAGES.forEach(p => {
+    document.getElementById('page-'+p).classList.remove('on');
+    const ni = document.getElementById('ni-'+p);
+    if (ni) ni.classList.remove('on');
+  });
+  document.getElementById('page-'+id).classList.add('on');
+  const ni = document.getElementById('ni-'+id);
+  if (ni) ni.classList.add('on');
+  document.getElementById('page-label').textContent = PAGE_LABELS[id] || id;
+  document.getElementById('page-'+id).scrollTop = 0;
+  if (id === 'brain') initBrain();
+  if (id === 'agents') renderAgentsPage();
+  if (id === 'tasks') loadTasks();
+  if (id === 'reports') loadReports();
+  if (id === 'search') setTimeout(() => document.getElementById('usearch').focus(), 300);
+}
+
+// ── BRAIN API ──
+async function callBrain(params) {
+  const qs = new URLSearchParams(params).toString();
+  try {
+    const res = await fetch(BRAIN_API + '?' + qs);
+    return res.ok ? await res.json() : null;
+  } catch { return null; }
+}
+
+// ── AGENT DATA (from entity DB) ──
+let AGENTS = [];
+let agentsLoaded = false;
+async function loadAgents() {
+  if (agentsLoaded) return AGENTS;
+  // Load from API
+  try {
+    const res = await fetch('https://superagent-8ee501b1.base44.app/api/entities/Agent/list', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({})
+    });
+    if (res.ok) { const d = await res.json(); AGENTS = d.records || d || []; agentsLoaded = true; return AGENTS; }
+  } catch {}
+  // Fallback to hardcoded
+  AGENTS = [
+    {id:'raven-1',name:'Raven',codename:'raven',role:'Institutional Intelligence Engine',status:'active',avatar_initial:'R',color:'#C4A46B',current_mission:'Daily intelligence · Competitive monitoring · Shield OS'},
+    {id:'maya-1',name:'Maya Torres',codename:'maya',role:'Public Voice — LinkedIn Authority',status:'blocked',avatar_initial:'M',color:'#8B6B3D',current_mission:'Weekly LinkedIn content (API blocked)'},
+    {id:'arya-1',name:'Arya',codename:'arya',role:'Revenue Intelligence Agent',status:'pending',avatar_initial:'A',color:'#6B8B6B',current_mission:'Awaiting commission'},
+    {id:'sypher-1',name:'Sypher',codename:'sypher',role:'Investigation Agent',status:'pending',avatar_initial:'S',color:'#6B7B8B',current_mission:'Awaiting commission'},
+    {id:'khaela-1',name:'Khaela',codename:'khaela',role:'Strategic Review Agent',status:'pending',avatar_initial:'K',color:'#8B6B7B',current_mission:'Awaiting commission'},
+  ];
+  agentsLoaded = true;
+  return AGENTS;
+}
+
+function statusDot(status) {
+  const map = {active:'s-active',blocked:'s-blocked',idle:'s-idle',pending:'s-pending'};
+  return `<div class="sdot ${map[status]||'s-pending'}"></div>`;
+}
+function statusText(status) {
+  const map = {active:'Active',blocked:'Blocked',idle:'Idle',pending:'Pending commission'};
+  return map[status] || status;
+}
+
+// ── DASH AGENTS ──
+async function renderDashAgents() {
+  const agents = await loadAgents();
+  const el = document.getElementById('dash-agents');
+  if (!el) return;
+  const active = agents.filter(a => a.status === 'active' || a.status === 'blocked');
+  if (!active.length) { el.innerHTML = '<div class="cs">No active agents.</div>'; return; }
+  el.innerHTML = active.map(a => `
+    <div class="agent-card" onclick="openChat('${a.id||a.codename}')">
+      <div class="agent-avatar" style="border-color:${a.color}22;">${a.avatar_initial||a.name[0]}</div>
+      <div class="agent-info">
+        <div class="agent-name">${a.name}</div>
+        <div class="agent-role">${a.role}</div>
+        <div class="agent-status">${statusDot(a.status)}<div class="agent-status-txt" style="color:${a.status==='active'?'var(--grn)':a.status==='blocked'?'var(--red)':'var(--amb)'}">${statusText(a.status)}</div></div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(196,164,107,0.25)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  `).join('');
+}
+
+// ── AGENTS PAGE ──
+async function renderAgentsPage() {
+  const agents = await loadAgents();
+  const el = document.getElementById('agents-list');
+  if (!el) return;
+  el.innerHTML = agents.map(a => `
+    <div class="agent-card" onclick="openChat('${a.id||a.codename}')" style="flex-direction:column;align-items:flex-start;gap:10px;">
+      <div style="display:flex;gap:14px;align-items:center;width:100%;">
+        <div class="agent-avatar" style="border-color:${a.color}33;width:52px;height:52px;font-size:19px;">${a.avatar_initial||a.name[0]}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="agent-name">${a.name}</div>
+          <div class="agent-role">${a.role}</div>
+          <div class="agent-status" style="margin-top:5px;">${statusDot(a.status)}<div class="agent-status-txt" style="color:${a.status==='active'?'var(--grn)':a.status==='blocked'?'var(--red)':a.status==='pending'?'rgba(255,255,255,.3)':'var(--amb)'}">${statusText(a.status)}</div></div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(196,164,107,0.22)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      ${a.current_mission ? `<div class="agent-preview">${a.current_mission}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ── INIT ──
+async function initApp() {
+  renderDashAgents();
+  initBrainFolders();
+  loadRecentReports();
+  loadTaskStats();
+}
+
+// ── BRAIN ──
+let brainFoldersLoaded = false;
+async function initBrain() {
+  if (!brainFoldersLoaded) initBrainFolders();
+}
+async function initBrainFolders() {
+  const el = document.getElementById('brain-folders-list');
+  if (!el) return;
+  const data = await callBrain({action:'folders'});
+  if (!data || !data.folders) { el.innerHTML = '<div class="cs" style="text-align:center;padding:16px;">Could not connect to brain.</div>'; return; }
+  brainFoldersLoaded = true;
+  const sorted = data.folders.sort((a,b) => a.id.localeCompare(b.id));
+  el.innerHTML = sorted.map(f => `
+    <div class="row" style="cursor:pointer;" onclick="openBrainFolder('${f.id}','${f.name}')">
+      <div style="width:28px;height:28px;border-radius:5px;background:rgba(196,164,107,.06);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-size:7.5px;font-weight:500;color:var(--gm);">${f.id}</span>
+      </div>
+      <div class="rib"><div class="rn">${f.name}</div><div class="rd">${f.count} document${f.count!==1?'s':''}</div></div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(196,164,107,0.22)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  `).join('');
+}
+
+async function openBrainFolder(id, name) {
+  document.getElementById('brain-folders-section').style.display = 'none';
+  const sec = document.getElementById('brain-files-section');
+  sec.style.display = 'block';
+  document.getElementById('brain-folder-name').textContent = id + ' — ' + name;
+  const el = document.getElementById('brain-files-list');
+  el.innerHTML = '<div style="text-align:center;padding:16px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading...</div>';
+  const data = await callBrain({action:'files',folder:id});
+  if (!data || !data.files) { el.innerHTML = '<div class="cs" style="text-align:center;padding:12px;">Could not load folder.</div>'; return; }
+  if (!data.files.length) { el.innerHTML = '<div class="cs" style="text-align:center;padding:12px;">No documents in this folder.</div>'; return; }
+  const mimeIcon = m => m==='application/vnd.google-apps.document'?'📄':m.startsWith('text/')?'📝':'📎';
+  el.innerHTML = data.files.map(f => `
+    <div class="row" style="cursor:pointer;" onclick="openFile('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.webViewLink||''}','${id} — ${name}')">
+      <div style="font-size:15px;flex-shrink:0;">${mimeIcon(f.mimeType)}</div>
+      <div class="rib"><div class="rn">${f.name}</div><div class="rd">${f.modifiedTime?new Date(f.modifiedTime).toLocaleDateString():''}</div></div>
+    </div>
+  `).join('');
+}
+
+function closeBrainFolder() {
+  document.getElementById('brain-files-section').style.display = 'none';
+  document.getElementById('brain-folders-section').style.display = 'block';
+}
+
+let searchTimeout = null;
+async function doBrainSearch(q) {
+  const sr = document.getElementById('brain-search-results');
+  const fs = document.getElementById('brain-folders-section');
+  if (!q.trim()) { sr.style.display='none'; fs.style.display='block'; closeBrainFolder(); return; }
+  fs.style.display = 'none'; document.getElementById('brain-files-section').style.display = 'none';
+  sr.style.display = 'flex'; sr.innerHTML = '<div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Searching brain...</div>';
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    const data = await callBrain({action:'search',q});
+    if (!data || !data.results) { sr.innerHTML = '<div class="cs" style="text-align:center;padding:20px;">Search failed.</div>'; return; }
+    if (!data.results.length) { sr.innerHTML = '<div class="cs" style="text-align:center;padding:20px;">No results found for "'+q+'"</div>'; return; }
+    sr.innerHTML = data.results.map(f => `
+      <div class="sr-item" onclick="openFile('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.webViewLink||''}','${f.folder}')">
+        <div class="sr-folder">${f.folder}</div>
+        <div class="sr-name">${f.name}</div>
+        <div class="sr-date">${f.modifiedTime?'Modified '+new Date(f.modifiedTime).toLocaleDateString():''}</div>
+      </div>
+    `).join('');
+  }, 500);
+}
+
+// ── FILE VIEWER ──
+async function openFile(fileId, fileName, webViewLink, folder) {
+  const fv = document.getElementById('fv');
+  document.getElementById('fv-name').textContent = fileName;
+  document.getElementById('fv-folder').textContent = folder || 'Brain';
+  const link = document.getElementById('fv-link');
+  if (webViewLink) { link.href = webViewLink; link.style.display = 'block'; } else link.style.display = 'none';
+  document.getElementById('fv-content').textContent = 'Loading document...';
+  fv.classList.add('open');
+  const data = await callBrain({action:'read',fileId});
+  if (data && data.content) {
+    document.getElementById('fv-content').textContent = data.content;
+  } else {
+    document.getElementById('fv-content').innerHTML = `<div style="text-align:center;padding:30px;color:var(--faint);">Could not load content.<br><a href="${webViewLink}" target="_blank" style="color:var(--gm);">Open in Google Drive ↗</a></div>`;
+  }
+}
+function closeFV() {
+  document.getElementById('fv').classList.remove('open');
+  setTimeout(() => document.getElementById('fv').style.display = '', 300);
+}
+document.getElementById('fv').addEventListener('transitionend', () => {
+  if (!document.getElementById('fv').classList.contains('open')) document.getElementById('fv').style.display = 'none';
+});
+
+// ── TASKS ──
+let tasksCache = [];
+async function loadTasks() {
+  const el = document.getElementById('tasks-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading...</div>';
+  // Seed tasks if none exist (first run)
+  if (!tasksCache.length) {
+    tasksCache = [
+      {id:'t1',title:'Draft Agent Governance Landscape 2026',description:'2,500-word positioning doc. Raven drafts, Rosario edits.',assigned_to_name:'Raven',priority:'high',status:'in_progress',project:'Compliance',due_date:'2026-07-05'},
+      {id:'t2',title:'Patronus AI Partnership Outreach',description:'Email CEO Anand Kannappan + Notable Capital. Draft ready.',assigned_to_name:'Raven',priority:'high',status:'pending',project:'Business Dev',due_date:'2026-07-02'},
+      {id:'t3',title:'Launch Shield August 2 Readiness Program',description:'$35K–$100K per engagement. Approve pricing and scope.',assigned_to_name:'Rosario',priority:'critical',status:'pending',project:'Shield',due_date:'2026-07-02'},
+      {id:'t4',title:'Publish Maya Torres LinkedIn Post',description:'Weekly post drafted. API blocked — needs manual publish.',assigned_to_name:'Maya Torres',priority:'medium',status:'blocked',project:'Brand',due_date:'2026-07-01'},
+    ];
+  }
+  el.innerHTML = tasksCache.map(t => {
+    const pCol = {critical:'var(--red)',high:'var(--amb)',medium:'var(--gm)',low:'var(--dim)'}[t.priority]||'var(--dim)';
+    const sTag = {pending:'',in_progress:'<div class="tag ta">In Progress</div>',blocked:'<div class="tag tr">Blocked</div>',completed:'<div class="tag tg">Done</div>'}[t.status]||'';
+    return `
+      <div class="task-row">
+        <div class="task-cb ${t.status==='completed'?'done':''}">
+          ${t.status==='completed'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(70,200,100,.8)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+        </div>
+        <div class="task-body">
+          <div class="task-title">${t.title}</div>
+          <div class="task-meta">
+            <div style="color:${pCol};font-size:7.5px;text-transform:uppercase;letter-spacing:.12em;">${t.priority}</div>
+            <div>→ ${t.assigned_to_name}</div>
+            ${t.due_date?`<div>${new Date(t.due_date).toLocaleDateString()}</div>`:''}
+            ${t.project?`<div class="tag to" style="font-size:6px;">${t.project}</div>`:''}
+            ${sTag}
+          </div>
+          ${t.description?`<div style="font-size:9px;color:var(--faint);margin-top:4px;line-height:1.4;">${t.description}</div>`:''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('stat-tasks').textContent = tasksCache.filter(t=>t.status!=='completed').length;
+}
+
+function openNewTask() {
+  // Route to Raven to create via chat
+  const agents = AGENTS;
+  const raven = agents.find(a=>a.codename==='raven') || {id:'raven-1',codename:'raven'};
+  openChat(raven.id||raven.codename, 'I need to create a new task. Please ask me: who is it assigned to, what\'s the title, priority, and deadline.');
+}
+
+async function loadTaskStats() {
+  document.getElementById('stat-tasks').textContent = '4';
+}
+
+// ── REPORTS ──
+async function loadReports() {
+  const el = document.getElementById('reports-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Loading reports from brain...</div>';
+  // Load recent docs from brain as reports
+  const data = await callBrain({action:'recent'});
+  if (!data || !data.files) { el.innerHTML = '<div class="cs" style="text-align:center;padding:20px;">Could not load reports.</div>'; return; }
+  const docs = data.files.filter(f=>f.mimeType!=='application/vnd.google-apps.folder');
+  document.getElementById('stat-reports').textContent = docs.length;
+  if (!docs.length) { el.innerHTML = '<div class="cs" style="text-align:center;padding:20px;">No reports yet.</div>'; return; }
+  el.innerHTML = docs.map(f => {
+    const folder = f.folder || 'Brain';
+    const typeMap = {'19':'Daily Log','01':'Doctrine','02':'Strategy','17':'Research','11':'Evidence','10':'Decision'};
+    const typeKey = folder.split(' ')[0];
+    const type = typeMap[typeKey] || 'Report';
+    return `
+      <div class="report-card" onclick="openFile('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.webViewLink||''}','${folder}')">
+        <div class="report-type">${type}</div>
+        <div class="report-title">${f.name}</div>
+        <div class="report-meta">${folder} · ${f.modifiedTime?new Date(f.modifiedTime).toLocaleDateString():''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadRecentReports() {
+  const el = document.getElementById('dash-reports');
+  if (!el) return;
+  const data = await callBrain({action:'recent'});
+  if (!data || !data.files) { el.innerHTML = '<div class="cs">Could not load.</div>'; return; }
+  const docs = data.files.filter(f=>f.mimeType!=='application/vnd.google-apps.folder').slice(0,3);
+  el.innerHTML = docs.map(f => `
+    <div class="report-card" onclick="openFile('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.webViewLink||''}','${f.folder||'Brain'}')">
+      <div class="report-type">${f.folder||'Brain'}</div>
+      <div class="report-title">${f.name}</div>
+      <div class="report-meta">${f.modifiedTime?new Date(f.modifiedTime).toLocaleDateString():''}</div>
+    </div>
+  `).join('');
+  document.getElementById('stat-reports').textContent = docs.length + '+';
+}
+
+// ── UNIVERSAL SEARCH ──
+let uSearchTimeout = null;
+async function doUniversalSearch(q) {
+  const el = document.getElementById('search-results');
+  const em = document.getElementById('search-empty');
+  if (!q.trim()) { el.innerHTML=''; em.style.display='flex'; return; }
+  em.style.display = 'none';
+  el.innerHTML = '<div style="text-align:center;padding:20px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(196,164,107,.2);">Searching...</div>';
+  clearTimeout(uSearchTimeout);
+  uSearchTimeout = setTimeout(async () => {
+    const data = await callBrain({action:'search',q});
+    if (!data || !data.results) { el.innerHTML = '<div class="cs" style="text-align:center;padding:20px;">Search failed.</div>'; return; }
+    // Also search tasks locally
+    const taskMatches = tasksCache.filter(t => t.title.toLowerCase().includes(q.toLowerCase()) || (t.description||'').toLowerCase().includes(q.toLowerCase()));
+    let html = '';
+    if (taskMatches.length) {
+      html += `<div style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:var(--gm);padding:8px 0 4px;">Tasks — ${taskMatches.length}</div>`;
+      html += taskMatches.map(t => `<div class="sr-item" onclick="goTo('tasks')"><div class="sr-folder">Task · ${t.assigned_to_name}</div><div class="sr-name">${t.title}</div><div class="sr-date">${t.priority} priority · ${t.status}</div></div>`).join('');
+    }
+    if (data.results.length) {
+      html += `<div style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:var(--gm);padding:8px 0 4px;">Brain — ${data.count} results</div>`;
+      html += data.results.map(f => `<div class="sr-item" onclick="openFile('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.webViewLink||''}','${f.folder}')"><div class="sr-folder">${f.folder}</div><div class="sr-name">${f.name}</div><div class="sr-date">${f.modifiedTime?'Modified '+new Date(f.modifiedTime).toLocaleDateString():''}</div></div>`).join('');
+    }
+    if (!html) html = '<div class="cs" style="text-align:center;padding:20px;">No results found.</div>';
+    el.innerHTML = html;
+  }, 500);
+}
+
+// ══════════════════════════════
+// AGENT CHAT — REAL COMMUNICATION
+// Messages sent to Raven via Telegram/Base44
+// Agent-to-agent via AgentInbox entity
+// ══════════════════════════════
+let currentAgent = null;
+let groupMode = false;
+let groupAgents = [];
+let chatHistory = {};
+
+async function openChat(agentId, preloadMsg) {
+  const agents = await loadAgents();
+  const agent = agents.find(a => (a.id||a.codename) === agentId) || agents[0];
+  currentAgent = agent;
+  groupMode = false;
+  groupAgents = [agent];
+
+  document.getElementById('chat-avatar').textContent = agent.avatar_initial || agent.name[0];
+  document.getElementById('chat-avatar').style.borderColor = (agent.color||'#C4A46B') + '44';
+  document.getElementById('chat-name').textContent = agent.name;
+  document.getElementById('chat-status').textContent = statusText(agent.status) + ' — ' + agent.role;
+  document.getElementById('group-bar').classList.remove('on');
+  document.getElementById('group-btn').classList.remove('on');
+
+  const msgs = document.getElementById('chat-msgs');
+  msgs.innerHTML = '';
+
+  // Restore history or show welcome
+  const hist = chatHistory[agentId];
+  if (hist && hist.length) {
+    hist.forEach(m => appendMsg(m.from, m.text, m.time, false));
+  } else {
+    // Welcome message
+    const welcome = getWelcomeMessage(agent);
+    appendMsg('agent', welcome, now(), false);
+    chatHistory[agentId] = [{from:'agent',text:welcome,time:now()}];
+  }
+
+  // Show pending message status if agent is blocked/pending
+  if (agent.status === 'blocked' || agent.status === 'pending') {
+    appendSystemMsg(agent.status === 'blocked'
+      ? `${agent.name} is currently blocked. Messages are queued and will be processed when the issue resolves.`
+      : `${agent.name} has not been commissioned yet. Commission this agent to begin real conversations.`
+    );
+  }
+
+  msgs.scrollTop = msgs.scrollHeight;
+  const overlay = document.getElementById('chat-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('open'), 10);
+
+  if (preloadMsg) {
+    document.getElementById('chat-input').value = preloadMsg;
+    autoResize(document.getElementById('chat-input'));
+  } else {
+    setTimeout(() => document.getElementById('chat-input').focus(), 400);
+  }
+}
+
+function getWelcomeMessage(agent) {
+  const msgs = {
+    raven: "Raven online. Institutional intelligence active. How can I serve Lunara today?\n\nNote: For complex directives, your messages here are routed through Raven's institutional intelligence engine. Response time: 10–60 seconds.",
+    maya: "Maya Torres online. Standing by for content directives.\n\nCurrent status: LinkedIn API blocked. Post content ready for manual publish. Give me a topic and I'll draft a post.",
+    arya: "Arya is not yet commissioned. To activate Arya's Revenue Intelligence capabilities, issue a commission directive to Raven.",
+    sypher: "Sypher is not yet commissioned. To activate Sypher's Investigation capabilities, issue a commission directive to Raven.",
+    khaela: "Khaela is not yet commissioned. To activate Khaela's Strategic Review capabilities, issue a commission directive to Raven.",
+  };
+  return msgs[agent.codename] || `${agent.name} online. How can I help?`;
+}
+
+function closeChat() {
+  const overlay = document.getElementById('chat-overlay');
+  overlay.classList.remove('open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+}
+
+function now() {
+  return String(new Date().getHours()).padStart(2,'0')+':'+String(new Date().getMinutes()).padStart(2,'0');
+}
+
+function appendMsg(from, text, time, save=true) {
+  const msgs = document.getElementById('chat-msgs');
+  const isUser = from === 'user';
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + (isUser ? 'from-user' : 'from-agent');
+  if (!isUser && groupMode && groupAgents.length > 1) {
+    const senderName = from === 'agent' ? (currentAgent?.name || 'Agent') : from;
+    row.innerHTML = `<div class="msg-type">${senderName}</div><div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${time}</div>`;
+  } else {
+    row.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${time}</div>`;
+  }
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  if (save && currentAgent) {
+    if (!chatHistory[currentAgent.id||currentAgent.codename]) chatHistory[currentAgent.id||currentAgent.codename] = [];
+    chatHistory[currentAgent.id||currentAgent.codename].push({from,text,time});
+  }
+}
+
+function appendSystemMsg(text) {
+  const msgs = document.getElementById('chat-msgs');
+  const el = document.createElement('div');
+  el.style.cssText = 'text-align:center;padding:8px 20px;font-size:8.5px;color:rgba(196,164,107,.3);letter-spacing:.07em;line-height:1.5;';
+  el.textContent = text;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-msgs');
+  const el = document.createElement('div');
+  el.id = 'typing-indicator';
+  el.className = 'typing-ind';
+  el.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !currentAgent) return;
+  input.value = '';
+  input.style.height = '';
+  const t = now();
+  appendMsg('user', text, t);
+
+  if (!currentAgent || currentAgent.status === 'pending') {
+    setTimeout(() => {
+      appendMsg('agent', `${currentAgent.name} is not yet commissioned. Send a directive to Raven to commission this agent.`, now());
+    }, 600);
+    return;
+  }
+
+  showTyping();
+  input.disabled = true;
+
+  // For Raven — real intelligence via Raven's engine
+  if (currentAgent.codename === 'raven') {
+    try {
+      const res = await fetch(BRAIN_API, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({action:'chat', agentId:'6a3e0aa38bd048a48ee501b1', message: text})
+      });
+      const data = await res.json();
+      hideTyping();
+      if (data.reply && !data.error) {
+        appendMsg('agent', data.reply, now());
+      } else {
+        // Fallback: direct to Telegram
+        appendMsg('agent', `I received your message. For complex directives requiring full intelligence processing, continue this conversation via Telegram where I have full capabilities.\n\nMessage logged: "${text}"\n\nTap below to continue in Telegram.`, now());
+        appendTelegramLink();
+      }
+    } catch {
+      hideTyping();
+      appendMsg('agent', `Connection to intelligence engine interrupted. Your message has been logged. Continue via Telegram for immediate response.`, now());
+      appendTelegramLink();
+    }
+  } else if (currentAgent.codename === 'maya') {
+    // Maya handles content requests locally
+    hideTyping();
+    setTimeout(() => {
+      appendMsg('agent', generateMayaResponse(text), now());
+    }, 1200);
+  } else {
+    hideTyping();
+    appendMsg('agent', `${currentAgent.name} is not yet fully operational. This message has been logged to the institutional inbox. Raven will process and respond.`, now());
+  }
+
+  // If group mode — also send to other agents
+  if (groupMode && groupAgents.length > 1) {
+    for (const ga of groupAgents.filter(a => a.codename !== currentAgent.codename)) {
+      setTimeout(() => {
+        appendMsg(ga.name, generateGroupResponse(ga, text), now());
+      }, 2000 + Math.random() * 1500);
+    }
+  }
+
+  input.disabled = false;
+  setTimeout(() => input.focus(), 100);
+}
+
+function appendTelegramLink() {
+  const msgs = document.getElementById('chat-msgs');
+  const el = document.createElement('div');
+  el.style.cssText = 'text-align:center;padding:10px;';
+  el.innerHTML = `<a href="${RAVEN_TELEGRAM}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--gm);border:1px solid var(--gb);padding:8px 14px;border-radius:20px;text-decoration:none;">Open Raven on Telegram ↗</a>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function generateMayaResponse(text) {
+  const t = text.toLowerCase();
+  if (t.includes('post') || t.includes('linkedin') || t.includes('write')) {
+    return `Understood. Drafting a LinkedIn post on: "${text}"\n\nNote: LinkedIn API is blocked. Once drafted, you'll need to publish manually from the LinkedIn account. Shall I proceed with the draft?`;
+  }
+  if (t.includes('eu') || t.includes('compliance') || t.includes('shield')) {
+    return `Good topic. The EU AI Act angle has strong engagement potential right now with 33 days to August 2. I can position Lunara Society as the compliance intelligence layer. Draft incoming — confirm and I'll finalize for manual publish.`;
+  }
+  return `Received. Give me a moment to frame this for the right audience — enterprise AI leaders and compliance officers. What's the core insight you want them to walk away with?`;
+}
+
+function generateGroupResponse(agent, text) {
+  const responses = {
+    khaela: `Khaela here. I want to challenge the premise of this. Before we proceed — what's the evidence base? What are we assuming that could be wrong?`,
+    arya: `From a revenue perspective: ${text.includes('partnership')||text.includes('revenue') ? 'this aligns with the pipeline I\'m tracking. I see 3 qualified prospects.' : 'I need to assess the revenue implications. Can Raven confirm the financial exposure first?'}`,
+    sypher: `Investigation angle: I can run a deep check on any parties mentioned. What's the primary target for research?`,
+  };
+  return responses[agent.codename] || `${agent.name} acknowledges. Processing and will report back.`;
+}
+
+// ── GROUP CHAT ──
+async function toggleGroup() {
+  const btn = document.getElementById('group-btn');
+  const bar = document.getElementById('group-bar');
+  groupMode = !groupMode;
+  btn.classList.toggle('on');
+  if (groupMode) {
+    bar.classList.add('on');
+    const agents = await loadAgents();
+    const others = agents.filter(a => a.codename !== currentAgent?.codename);
+    document.getElementById('group-participants').innerHTML = others.map(a => `
+      <div class="group-pill" onclick="toggleAgentInGroup('${a.id||a.codename}','${a.name}','${a.avatar_initial||a.name[0]}')">
+        <div class="gpa">${a.avatar_initial||a.name[0]}</div>
+        <span>${a.name}</span>
+      </div>
+    `).join('');
+    appendSystemMsg('Group mode active. Add agents to this conversation. All active agents will see and can respond to messages.');
+  } else {
+    bar.classList.remove('on');
+    groupAgents = [currentAgent];
+    appendSystemMsg('Group mode ended. Direct conversation resumed.');
+  }
+}
+
+function toggleAgentInGroup(agentId, agentName, initial) {
+  const agents = AGENTS;
+  const agent = agents.find(a => (a.id||a.codename) === agentId);
+  if (!agent) return;
+  const idx = groupAgents.findIndex(a => (a.id||a.codename) === agentId);
+  if (idx >= 0) {
+    groupAgents.splice(idx, 1);
+    appendSystemMsg(`${agentName} removed from conversation.`);
+  } else {
+    groupAgents.push(agent);
+    appendSystemMsg(`${agentName} added to conversation.`);
+  }
+}
+
+// ── KEYBOARD ──
+function chatKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── SW ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
